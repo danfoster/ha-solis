@@ -1,0 +1,14 @@
+{
+  "domain": "solis_local",
+  "version": "0.1.0",
+  "name": "Solis Inverter",
+  "iot_class": "local_polling",
+  "documentation": "",
+  "issue_tracker": "",
+  "dependencies": [],
+  "codeowners": ["@danfoster"],
+  "config_flow": true,
+  "requirements": [
+    "git+https://github.com/danfoster/solis.git@main#solis==1.0.0"
+  ]
+}

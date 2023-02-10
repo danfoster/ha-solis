@@ -1,0 +1,17 @@
+{
+    "config": {
+        "error": {
+            "serial_invalid": "Invalid serial number provided"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "ip": "IP Address on the data logging stick",
+                    "serial": "The Serial of the Data logging stick"
+                },
+                "description": "Configure access to the data logger stick",
+                "title": "Config"
+            }
+        }
+    }
+}
