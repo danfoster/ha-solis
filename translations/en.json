@@ -1,7 +1,8 @@
 {
     "config": {
         "error": {
-            "serial_invalid": "Invalid serial number provided"
+            "serial_invalid": "Invalid serial number provided",
+            "connection_error": "Cannot connect"
         },
         "step": {
             "user": {
