@@ -5,6 +5,7 @@ import logging
 from .const import DOMAIN
 from .device import solis_device
 from solis import solis
+from datetime import timedelta
 _LOGGER = logging.getLogger(__name__)
 
 from homeassistant.components.sensor import (
@@ -16,7 +17,11 @@ from homeassistant.const import PERCENTAGE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
-
+from homeassistant.helpers.update_coordinator import (
+    CoordinatorEntity,
+    DataUpdateCoordinator,
+    UpdateFailed,
+)
 
 
 async def async_setup_entry(
@@ -27,15 +32,32 @@ async def async_setup_entry(
     """Setup sensors from a config entry created in the integrations UI."""
 
     for entry_id, config in hass.data[DOMAIN].items():
-        _LOGGER.info(config)
-        solis_inst = solis.Solis(config["ip"], int(config["serial"]))
+        coordinator = SolisCoordinator(hass, config["ip"], int(config["serial"]))
+        await coordinator.async_config_entry_first_refresh()
         sensors = [
-            BatteryLevel(solis_inst)
+            BatteryLevel(coordinator)
         ]
-        async_add_entities(sensors, update_before_add=True)
+        async_add_entities(sensors)
 
 
-class BatteryLevel(SensorEntity):
+class SolisCoordinator(DataUpdateCoordinator):
+
+    def __init__(self, hass, ip, serial):
+        super().__init__(
+            hass,
+            _LOGGER,
+            # Name of the data. For logging purposes.
+            name="Solis",
+            # Polling interval. Will only be polled if there are subscribers.
+            update_interval=timedelta(seconds=60),
+        )
+        self.solis = solis.Solis(ip, serial)
+
+    async def _async_update_data(self) -> None:
+        self.solis.update()
+
+
+class BatteryLevel(CoordinatorEntity, SensorEntity):
     """Representation of a Sensor."""
 
     _attr_name = "Battery Level"
@@ -44,24 +66,21 @@ class BatteryLevel(SensorEntity):
     _attr_state_class = SensorStateClass.MEASUREMENT
 
 
-    def __init__(self, solis):
+    def __init__(self, coordinator):
+        super().__init__(coordinator)
+        self.coordinator = coordinator
 
-        self.solis = solis
-        super().__init__()
 
-
-    def update(self) -> None:
-        """Fetch new state data for the sensor.
-        This is the only method that should fetch new data for Home Assistant.
-        """
-        self._attr_native_value = self.solis.batt_charge_level
+    @property
+    def state(self):
+        return self.coordinator.solis.batt_charge_level
 
     @property
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
-        return solis_device(self.solis.serial)
+        return solis_device(self.coordinator.solis.serial)
 
 
     @property
     def unique_id(self) ->  str:
-        return self.solis.serial
+        return self.coordinator.solis.serial
