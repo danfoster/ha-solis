@@ -13,7 +13,7 @@ from homeassistant.components.sensor import (
     SensorEntity,
     SensorStateClass,
 )
-from homeassistant.const import PERCENTAGE
+from homeassistant.const import PERCENTAGE, UnitOfPower
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
@@ -32,10 +32,11 @@ async def async_setup_entry(
     """Setup sensors from a config entry created in the integrations UI."""
 
     for entry_id, config in hass.data[DOMAIN].items():
-        coordinator = SolisCoordinator(hass, config["ip"], int(config["serial"]))
+        coordinator = Solis Coordinator(hass, config["ip"], int(config["serial"]))
         await coordinator.async_config_entry_first_refresh()
         sensors = [
-            BatteryLevel(coordinator)
+            BatteryLevel(coordinator),
+            BatteryChargeRate(coordinator)
         ]
         async_add_entities(sensors)
 
@@ -53,11 +54,28 @@ class SolisCoordinator(DataUpdateCoordinator):
         )
         self.solis = solis.Solis(ip, serial)
 
+        self.serial = serial
+
     async def _async_update_data(self) -> None:
-        self.solis.update()
+        await self.solis._init()
+        await self.solis.async_update()
+
+class SolisSensor(CoordinatorEntity, SensorEntity):
+    """Representation of a Sensor."""
 
 
-class BatteryLevel(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator):
+        super().__init__(coordinator)
+        self.coordinator = coordinator
+        self.serial = self.coordinator.serial
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return the device info."""
+        return solis_device(self.serial)
+
+
+class BatteryLevel(SolisSensor):
     """Representation of a Sensor."""
 
     _attr_name = "Battery Level"
@@ -65,22 +83,26 @@ class BatteryLevel(CoordinatorEntity, SensorEntity):
     _attr_device_class = SensorDeviceClass.BATTERY
     _attr_state_class = SensorStateClass.MEASUREMENT
 
-
-    def __init__(self, coordinator):
-        super().__init__(coordinator)
-        self.coordinator = coordinator
-
-
     @property
     def state(self):
         return self.coordinator.solis.batt_charge_level
 
     @property
-    def device_info(self) -> DeviceInfo:
-        """Return the device info."""
-        return solis_device(self.coordinator.solis.serial)
+    def unique_id(self) ->  str:
+        return str(self.serial) + "_battlevel"
 
+class BatteryChargeRate(SolisSensor):
+    """Representation of a Sensor."""
+
+    _attr_name = "Battery Charge Rate"
+    _attr_native_unit_of_measurement = UnitOfPower.WATT
+    _attr_device_class = SensorDeviceClass.POWER
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def state(self):
+        return self.coordinator.solis.batt_charge_rate
 
     @property
     def unique_id(self) ->  str:
-        return self.coordinator.solis.serial
+        return str(self.serial) + "_battcharge"
