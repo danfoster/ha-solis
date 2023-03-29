@@ -1,38 +1,39 @@
 """Platform for sensor integration."""
 from __future__ import annotations
 import logging
-
-from .const import DOMAIN
-from .device import solis_device
-from solis import solis
 from datetime import timedelta
-_LOGGER = logging.getLogger(__name__)
 
+from solis import solis
+from homeassistant.helpers.entity import DeviceInfo
+from homeassistant import config_entries
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
     SensorStateClass,
 )
 from homeassistant.const import PERCENTAGE, UnitOfPower
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
     DataUpdateCoordinator,
-    UpdateFailed,
 )
+
+from .const import DOMAIN
+from .device import solis_device
+
+
+_LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
-    hass: core.HomeAssistant,
-    config_entry: config_entries.ConfigEntry,
+    hass: HomeAssistant,
+    _: config_entries.ConfigEntry,
     async_add_entities,
 ) -> None:
     """Setup sensors from a config entry created in the integrations UI."""
 
-    for entry_id, config in hass.data[DOMAIN].items():
-        coordinator = Solis Coordinator(hass, config["ip"], int(config["serial"]))
+    for _, config in hass.data[DOMAIN].items():
+        coordinator = await SolisCoordinator.create(hass, config["ip"], int(config["serial"]))
         await coordinator.async_config_entry_first_refresh()
         sensors = [
             BatteryLevel(coordinator),
@@ -42,8 +43,23 @@ async def async_setup_entry(
 
 
 class SolisCoordinator(DataUpdateCoordinator):
+    """
+    Home assistant coordinator for Solis. Responsible
+    for pulling data from the Solis Inverter.
+    """
+    @classmethod
+    async def create(cls, hass, ipaddr, serial):
+        """
+        Factory method for creating the object via a async
+        co-routine.
+        Use instead of the normal contructor.
+        """
+        self = SolisCoordinator(hass, serial)
+        self.solis = await solis.Solis.create(ipaddr, serial)
+        return self
 
-    def __init__(self, hass, ip, serial):
+
+    def __init__(self, hass, serial):
         super().__init__(
             hass,
             _LOGGER,
@@ -52,12 +68,10 @@ class SolisCoordinator(DataUpdateCoordinator):
             # Polling interval. Will only be polled if there are subscribers.
             update_interval=timedelta(seconds=60),
         )
-        self.solis = solis.Solis(ip, serial)
-
+        self.solis = None
         self.serial = serial
 
     async def _async_update_data(self) -> None:
-        await self.solis._init()
         await self.solis.async_update()
 
 class SolisSensor(CoordinatorEntity, SensorEntity):
@@ -83,9 +97,11 @@ class BatteryLevel(SolisSensor):
     _attr_device_class = SensorDeviceClass.BATTERY
     _attr_state_class = SensorStateClass.MEASUREMENT
 
-    @property
-    def state(self):
-        return self.coordinator.solis.batt_charge_level
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self._attr_native_value = self.coordinator.solis.batt_change_level
+        self.async_write_ha_state()
 
     @property
     def unique_id(self) ->  str:
@@ -99,9 +115,11 @@ class BatteryChargeRate(SolisSensor):
     _attr_device_class = SensorDeviceClass.POWER
     _attr_state_class = SensorStateClass.MEASUREMENT
 
-    @property
-    def state(self):
-        return self.coordinator.solis.batt_charge_rate
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self._attr_native_value = self.coordinator.solis.batt_charge_rate
+        self.async_write_ha_state()
 
     @property
     def unique_id(self) ->  str:
