@@ -100,7 +100,7 @@ class BatteryLevel(SolisSensor):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        self._attr_native_value = self.coordinator.solis.batt_change_level
+        self._attr_native_value = self.coordinator.solis.batt_charge_level
         self.async_write_ha_state()
 
     @property
