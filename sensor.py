@@ -11,7 +11,7 @@ from homeassistant.components.sensor import (
     SensorEntity,
     SensorStateClass,
 )
-from homeassistant.const import PERCENTAGE, UnitOfPower
+from homeassistant.const import PERCENTAGE, UnitOfPower, UnitOfElectricPotential, TEMP_CELSIUS, UnitOfEnergy
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
@@ -37,7 +37,9 @@ async def async_setup_entry(
         await coordinator.async_config_entry_first_refresh()
         sensors = [
             BatteryLevel(coordinator),
-            BatteryChargeRate(coordinator)
+            BatteryChargeRate(coordinator),
+            DCVoltage1(coordinator),
+            DCVoltage2(coordinator)
         ]
         async_add_entities(sensors)
 
@@ -92,10 +94,17 @@ class SolisSensor(CoordinatorEntity, SensorEntity):
 class BatteryLevel(SolisSensor):
     """Representation of a Sensor."""
 
-    _attr_name = "Battery Level"
+    _attr_has_entity_name = True
     _attr_native_unit_of_measurement = PERCENTAGE
     _attr_device_class = SensorDeviceClass.BATTERY
     _attr_state_class = SensorStateClass.MEASUREMENT
+
+
+    @property
+    def name(self):
+        """Name of the entity."""
+        return "Battery Level"
+
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -110,10 +119,15 @@ class BatteryLevel(SolisSensor):
 class BatteryChargeRate(SolisSensor):
     """Representation of a Sensor."""
 
-    _attr_name = "Battery Charge Rate"
+    _attr_has_entity_name = True
     _attr_native_unit_of_measurement = UnitOfPower.WATT
     _attr_device_class = SensorDeviceClass.POWER
     _attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def name(self):
+        """Name of the entity."""
+        return "Battery Charge Rate"
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -124,3 +138,303 @@ class BatteryChargeRate(SolisSensor):
     @property
     def unique_id(self) ->  str:
         return str(self.serial) + "_battcharge"
+
+class DCVoltage1(SolisSensor):
+    """Representation of a Sensor."""
+
+    _attr_has_entity_name = True
+    _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
+    _attr_device_class = SensorDeviceClass.VOLTAGE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def name(self):
+        """Name of the entity."""
+        return "DC Voltage 1"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self._attr_native_value = self.coordinator.solis.dc_voltage_1
+        self.async_write_ha_state()
+
+    @property
+    def unique_id(self) ->  str:
+        return str(self.serial) + "_dc_voltage_1"
+
+class DCVoltage2(SolisSensor):
+    """Representation of a Sensor."""
+
+    _attr_has_entity_name = True
+    _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
+    _attr_device_class = SensorDeviceClass.VOLTAGE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def name(self):
+        """Name of the entity."""
+        return "DC Voltage 2"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self._attr_native_value = self.coordinator.solis.dc_voltage_2
+        self.async_write_ha_state()
+
+    @property
+    def unique_id(self) ->  str:
+        return str(self.serial) + "_dc_voltage_2"
+
+class Temperature(SolisSensor):
+    """Representation of a Sensor."""
+
+    _attr_has_entity_name = True
+    _attr_native_unit_of_measurement = TEMP_CELSIUS
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def name(self):
+        """Name of the entity."""
+        return "Temperture"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self._attr_native_value = self.coordinator.solis.temperture
+        self.async_write_ha_state()
+
+    @property
+    def unique_id(self) ->  str:
+        return str(self.serial) + "_temperture"
+
+class PowerGenToday(SolisSensor):
+    """Representation of a Sensor."""
+
+    _attr_has_entity_name = True
+    _attr_native_unit_of_measurement = UnitOfEnergy.WATT_HOUR
+    _attr_device_class = SensorDeviceClass.ENERGY
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def name(self):
+        """Name of the entity."""
+        return "Power Generation Today"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self._attr_native_value = self.coordinator.solis.power_gen_today
+        self.async_write_ha_state()
+
+    @property
+    def unique_id(self) ->  str:
+        return str(self.serial) + "_power_gen_today"
+
+class BatteryChargeToday(SolisSensor):
+    """Representation of a Sensor."""
+
+    _attr_has_entity_name = True
+    _attr_native_unit_of_measurement = UnitOfEnergy.WATT_HOUR
+    _attr_device_class = SensorDeviceClass.ENERGY
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def name(self):
+        """Name of the entity."""
+        return "Battery Charge Today"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self._attr_native_value = self.coordinator.solis.battery_charge_today
+        self.async_write_ha_state()
+
+    @property
+    def unique_id(self) ->  str:
+        return str(self.serial) + "_battery_charge_today"
+
+
+class BatteryDischargeToday(SolisSensor):
+    """Representation of a Sensor."""
+
+    _attr_has_entity_name = True
+    _attr_native_unit_of_measurement = UnitOfEnergy.WATT_HOUR
+    _attr_device_class = SensorDeviceClass.ENERGY
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def name(self):
+        """Name of the entity."""
+        return "Battery Discharge Today"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self._attr_native_value = self.coordinator.solis.battery_charge_today
+        self.async_write_ha_state()
+
+    @property
+    def unique_id(self) ->  str:
+        return str(self.serial) + "_battery_charge_today"
+
+class HouseLoadToday(SolisSensor):
+    """Representation of a Sensor."""
+
+    _attr_has_entity_name = True
+    _attr_native_unit_of_measurement = UnitOfEnergy.WATT_HOUR
+    _attr_device_class = SensorDeviceClass.ENERGY
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def name(self):
+        """Name of the entity."""
+        return "House Load Today"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self._attr_native_value = self.coordinator.solis.house_load_today
+        self.async_write_ha_state()
+
+    @property
+    def unique_id(self) ->  str:
+        return str(self.serial) + "_house_load_today"
+
+class GridImportedToday(SolisSensor):
+    """Representation of a Sensor."""
+
+    _attr_has_entity_name = True
+    _attr_native_unit_of_measurement = UnitOfEnergy.WATT_HOUR
+    _attr_device_class = SensorDeviceClass.ENERGY
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def name(self):
+        """Name of the entity."""
+        return "Grid Imported Today"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self._attr_native_value = self.coordinator.solis.grid_imported_today
+        self.async_write_ha_state()
+
+    @property
+    def unique_id(self) ->  str:
+        return str(self.serial) + "_grid_imported_today"
+
+class GridExportedToday(SolisSensor):
+    """Representation of a Sensor."""
+
+    _attr_has_entity_name = True
+    _attr_native_unit_of_measurement = UnitOfEnergy.WATT_HOUR
+    _attr_device_class = SensorDeviceClass.ENERGY
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def name(self):
+        """Name of the entity."""
+        return "Grid Exported Today"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self._attr_native_value = self.coordinator.solis.grid_exported_today
+        self.async_write_ha_state()
+
+    @property
+    def unique_id(self) ->  str:
+        return str(self.serial) + "_grid_exported_today"
+
+class PowerGenertion(SolisSensor):
+    """Representation of a Sensor."""
+
+    _attr_has_entity_name = True
+    _attr_native_unit_of_measurement = UnitOfEnergy.WATT_HOUR
+    _attr_device_class = SensorDeviceClass.POWER
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def name(self):
+        """Name of the entity."""
+        return "Power Generation"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self._attr_native_value = self.coordinator.solis.power_generation
+        self.async_write_ha_state()
+
+    @property
+    def unique_id(self) ->  str:
+        return str(self.serial) + "_power_generation"
+
+class HouseLoad(SolisSensor):
+    """Representation of a Sensor."""
+
+    _attr_has_entity_name = True
+    _attr_native_unit_of_measurement = UnitOfEnergy.WATT_HOUR
+    _attr_device_class = SensorDeviceClass.POWER
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def name(self):
+        """Name of the entity."""
+        return "House Load"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self._attr_native_value = self.coordinator.solis.house_load
+        self.async_write_ha_state()
+
+    @property
+    def unique_id(self) ->  str:
+        return str(self.serial) + "_house_load"
+
+class BackupLoad(SolisSensor):
+    """Representation of a Sensor."""
+
+    _attr_has_entity_name = True
+    _attr_native_unit_of_measurement = UnitOfEnergy.WATT_HOUR
+    _attr_device_class = SensorDeviceClass.POWER
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def name(self):
+        """Name of the entity."""
+        return "Backup Load"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self._attr_native_value = self.coordinator.solis.backup_load
+        self.async_write_ha_state()
+
+    @property
+    def unique_id(self) ->  str:
+        return str(self.serial) + "_backup_load"
+
+class GridUsage(SolisSensor):
+    """Representation of a Sensor."""
+
+    _attr_has_entity_name = True
+    _attr_native_unit_of_measurement = UnitOfEnergy.WATT_HOUR
+    _attr_device_class = SensorDeviceClass.POWER
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def name(self):
+        """Name of the entity."""
+        return "Grid Usage"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self._attr_native_value = self.coordinator.solis.grid_usage
+        self.async_write_ha_state()
+
+    @property
+    def unique_id(self) ->  str:
+        return str(self.serial) + "_grid_usage"

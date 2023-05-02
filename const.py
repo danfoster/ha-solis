@@ -1,1 +1,1 @@
-DOMAIN="solis_local"
+DOMAIN="ha-solis"

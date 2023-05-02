@@ -7,7 +7,7 @@ def solis_device(serial):
             # Serial numbers are unique identifiers within a specific domain
             (DOMAIN, serial)
         },
-        name="solis",
+        name=f"Solis Inverter ({serial})",
         manufacturer="ginlong",
         model="solis",
         sw_version="0.0.1"

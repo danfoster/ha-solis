@@ -1,5 +1,5 @@
 {
-  "domain": "solis_local",
+  "domain": "ha-solis",
   "version": "0.1.0",
   "name": "Solis Inverter",
   "iot_class": "local_polling",
