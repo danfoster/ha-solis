@@ -9,6 +9,6 @@
   "codeowners": ["@danfoster"],
   "config_flow": true,
   "requirements": [
-    "solis=>0.1.0"
+    "solis>=0.1.0"
   ]
 }
