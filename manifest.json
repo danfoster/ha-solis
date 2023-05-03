@@ -9,6 +9,6 @@
   "codeowners": ["@danfoster"],
   "config_flow": true,
   "requirements": [
-    "git+https://github.com/danfoster/solis.git@main#solis==1.0.0"
+    "solis=>0.1.0"
   ]
 }
