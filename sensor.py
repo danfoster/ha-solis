@@ -39,10 +39,20 @@ async def async_setup_entry(
             BatteryLevel(coordinator),
             BatteryChargeRate(coordinator),
             DCVoltage1(coordinator),
-            DCVoltage2(coordinator)
+            DCVoltage2(coordinator),
+            Temperature(coordinator),
+            PowerGenToday(coordinator),
+            BatteryChargeToday(coordinator),
+            BatteryDischargeToday(coordinator),
+            HouseLoadToday(coordinator),
+            GridImportedToday(coordinator),
+            GridExportedToday(coordinator),
+            PowerGenertion(coordinator),
+            HouseLoad(coordinator),
+            BackupLoad(coordinator),
+            GridUsage(coordinator),
         ]
         async_add_entities(sensors)
-
 
 class SolisCoordinator(DataUpdateCoordinator):
     """
@@ -89,7 +99,6 @@ class SolisSensor(CoordinatorEntity, SensorEntity):
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
         return solis_device(self.serial)
-
 
 class BatteryLevel(SolisSensor):
     """Representation of a Sensor."""
@@ -254,7 +263,6 @@ class BatteryChargeToday(SolisSensor):
     def unique_id(self) ->  str:
         return str(self.serial) + "_battery_charge_today"
 
-
 class BatteryDischargeToday(SolisSensor):
     """Representation of a Sensor."""
 
@@ -351,7 +359,7 @@ class PowerGenertion(SolisSensor):
     """Representation of a Sensor."""
 
     _attr_has_entity_name = True
-    _attr_native_unit_of_measurement = UnitOfEnergy.WATT_HOUR
+    _attr_native_unit_of_measurement = UnitOfPower.WATT
     _attr_device_class = SensorDeviceClass.POWER
     _attr_state_class = SensorStateClass.MEASUREMENT
 
@@ -374,7 +382,7 @@ class HouseLoad(SolisSensor):
     """Representation of a Sensor."""
 
     _attr_has_entity_name = True
-    _attr_native_unit_of_measurement = UnitOfEnergy.WATT_HOUR
+    _attr_native_unit_of_measurement = UnitOfPower.WATT
     _attr_device_class = SensorDeviceClass.POWER
     _attr_state_class = SensorStateClass.MEASUREMENT
 
@@ -397,7 +405,7 @@ class BackupLoad(SolisSensor):
     """Representation of a Sensor."""
 
     _attr_has_entity_name = True
-    _attr_native_unit_of_measurement = UnitOfEnergy.WATT_HOUR
+    _attr_native_unit_of_measurement = UnitOfPower.WATT
     _attr_device_class = SensorDeviceClass.POWER
     _attr_state_class = SensorStateClass.MEASUREMENT
 
@@ -420,7 +428,7 @@ class GridUsage(SolisSensor):
     """Representation of a Sensor."""
 
     _attr_has_entity_name = True
-    _attr_native_unit_of_measurement = UnitOfEnergy.WATT_HOUR
+    _attr_native_unit_of_measurement = UnitOfPower.WATT
     _attr_device_class = SensorDeviceClass.POWER
     _attr_state_class = SensorStateClass.MEASUREMENT
 
