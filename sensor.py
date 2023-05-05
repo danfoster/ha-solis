@@ -223,7 +223,7 @@ class PowerGenToday(SolisSensor):
     _attr_has_entity_name = True
     _attr_native_unit_of_measurement = UnitOfEnergy.WATT_HOUR
     _attr_device_class = SensorDeviceClass.ENERGY
-    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_state_class = SensorStateClass.TOTAL_INCREASING
 
     @property
     def name(self):
@@ -246,7 +246,7 @@ class BatteryChargeToday(SolisSensor):
     _attr_has_entity_name = True
     _attr_native_unit_of_measurement = UnitOfEnergy.WATT_HOUR
     _attr_device_class = SensorDeviceClass.ENERGY
-    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_state_class = SensorStateClass.TOTAL_INCREASING
 
     @property
     def name(self):
@@ -269,7 +269,7 @@ class BatteryDischargeToday(SolisSensor):
     _attr_has_entity_name = True
     _attr_native_unit_of_measurement = UnitOfEnergy.WATT_HOUR
     _attr_device_class = SensorDeviceClass.ENERGY
-    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_state_class = SensorStateClass.TOTAL_INCREASING
 
     @property
     def name(self):
@@ -292,7 +292,7 @@ class HouseLoadToday(SolisSensor):
     _attr_has_entity_name = True
     _attr_native_unit_of_measurement = UnitOfEnergy.WATT_HOUR
     _attr_device_class = SensorDeviceClass.ENERGY
-    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_state_class = SensorStateClass.TOTAL_INCREASING
 
     @property
     def name(self):
@@ -315,7 +315,7 @@ class GridImportedToday(SolisSensor):
     _attr_has_entity_name = True
     _attr_native_unit_of_measurement = UnitOfEnergy.WATT_HOUR
     _attr_device_class = SensorDeviceClass.ENERGY
-    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_state_class = SensorStateClass.TOTAL_INCREASING
 
     @property
     def name(self):
@@ -338,7 +338,7 @@ class GridExportedToday(SolisSensor):
     _attr_has_entity_name = True
     _attr_native_unit_of_measurement = UnitOfEnergy.WATT_HOUR
     _attr_device_class = SensorDeviceClass.ENERGY
-    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_state_class = SensorStateClass.TOTAL_INCREASING
 
     @property
     def name(self):
